@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.5//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <!--    这里的TypeHandler表示全局的TypeHandler，若只想局部使用某个Handler，那么应该只是在-->
+    <!--    ResultMap 中指定局部的typeHandler-->
+    <typeHandlers>
+<!--        <typeHandler handler="com.yyl.typeHandler.SexTypeHandler"/>-->
+        <typeHandler handler="com.yyl.typeHandler.SexEnumTypeHandler" javaType="com.yyl.enums.SexEnum"/>
+    </typeHandlers>
+    <objectFactory type="com.yyl.ObjectFactory.MyObjectFactory">
+    </objectFactory>
+    <!--    定义别名-->
+<!--    <typeAliases>-->
+<!--        <typeAlias type="com.yyl.bean.Course" alias="course"/>-->
+<!--    </typeAliases>-->
+    <plugins>
+        <plugin interceptor="com.yyl.interceptor.StatementHandlerInrceptor"/>
+<!--        <plugin interceptor="com.github.pagehelper.PageInterceptor"></plugin>-->
+    </plugins>
+
+    <!-- 定义数据库信息 默认使用development数据库构建环境-->
+    <environments default="development">
+        <environment id="development">
+            <!-- 采用JDBC事务管理 有三种：
+            JDBC：采用JDBC方式管理事务，在独立编码中经常使用
+            MANAGED：采用容器方式管理事务，在JNDI数据源常用
+            自定义：由使用者自定义数据库事务管理方法，适用于特殊应用
+            -->
+            <transactionManager type="JDBC">
+            </transactionManager>
+            <!--
+             type属性是提供我们对数据库连接方式的配置
+             1）UNPOOLED，非连接池数据库
+             2）POOLED，连接池数据库
+             3）JNDI:JNDI数据源
+             4）自定义数据源
+             -->
+            <dataSource type="POOLED">
+                <property name="driver" value="com.mysql.jdbc.Driver"/>
+                <property name="url" value="jdbc:mysql://localhost:3306/mybatis"/>
+                <property name="username" value="root"/>
+                <property name="password" value="root"/>
+            </dataSource>
+        </environment>
+    </environments>
+
+    <databaseIdProvider type="com.yyl.databaseIdProvider.MyDatabaseIdProvider" />
+
+
+
+    <!-- 定义映射器 -->
+    <mappers>
+        <mapper resource="student.xml"/>
+    </mappers>
+</configuration>
