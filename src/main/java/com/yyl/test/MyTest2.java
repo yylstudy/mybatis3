@@ -4,12 +4,14 @@ import com.github.pagehelper.PageHelper;
 import com.yyl.bean.Student;
 import com.yyl.configuration.SqlSessionUtil;
 import com.yyl.dao.StudentMapper;
+import com.yyl.objectWrapperFactory.HumpMap;
 import com.yyl.page.PageInfo;
 import com.yyl.page.PageResult;
 import org.apache.ibatis.session.SqlSession;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
@@ -82,5 +84,14 @@ public class MyTest2 {
         studentMapper.insert(student);
         sqlSession.commit();
     }
+    @Test
+    public void comparatorByDate(){
+        SqlSession sqlSession = SqlSessionUtil.getSqlSession();
+        StudentMapper studentMapper = sqlSession.getMapper(StudentMapper.class);
+        List<HumpMap<String,Object>> list = studentMapper.comparatorByDate(new Date());
+        System.out.println(list);
+    }
+
+
 
 }

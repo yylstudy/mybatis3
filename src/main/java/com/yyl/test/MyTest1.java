@@ -4,11 +4,18 @@ import com.yyl.bean.Student;
 import com.yyl.configuration.SqlSessionUtil;
 import com.yyl.dao.StudentMapper;
 import com.yyl.enums.SexEnum;
+import com.yyl.objectWrapperFactory.HumpMap;
+import com.yyl.search.MyContextAccessor;
+import com.yyl.search.OperatorEnum;
+import com.yyl.search.Searcher;
+import org.apache.ibatis.ognl.OgnlRuntime;
+import org.apache.ibatis.scripting.xmltags.DynamicContext;
 import org.apache.ibatis.session.SqlSession;
 import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Description: TODO
@@ -54,7 +61,7 @@ public class MyTest1 {
 
     /**
      * mybatis 嵌套查询 id列数据重复测试,可以看到，即使
-     * 数据库中的用户有三个，但是因为cnname不是唯一的，所以也被合并了
+     * 数据库中的用户存在，但是因为cnname不是唯一的，所以也被合并了，这个只会在联合查询的时候出现
      * 在联合查询的时候最好指定id 否则，则以所有的resultMap中的列 创建rowkey
      */
     @Test
@@ -149,5 +156,67 @@ public class MyTest1 {
         List<Student> students = studentMapper.queryBatch(Arrays.asList(1,2,3));
         System.out.println(students);
     }
+    /**
+     * mybatis 下划线转驼峰
+     */
+    @Test
+    public void selectGradeByHumpMap(){
+        SqlSession sqlSession = SqlSessionUtil.getSqlSession();
+        StudentMapper studentMapper = sqlSession.getMapper(StudentMapper.class);
+        HumpMap grade = studentMapper.selectGradeBuHumpMap(1L);
+        System.out.println(grade);
+    }
+
+    /**
+     * mybatis 查询不带@Param的Searcher
+     */
+    @Test
+    public void selectByNoParamSearch(){
+        SqlSession sqlSession = SqlSessionUtil.getSqlSession();
+        StudentMapper studentMapper = sqlSession.getMapper(StudentMapper.class);
+        Searcher searcher = new Searcher();
+        searcher.addCondition("student_id","7", OperatorEnum.EQUALS);
+        setMyContextAccessor(sqlSession);
+        HumpMap grade = studentMapper.selectByNoParamSearch(searcher);
+        System.out.println(grade);
+    }
+
+    /**
+     * 查询带@Param的Searcher
+     */
+    @Test
+    public void selectByParamSearch(){
+        SqlSession sqlSession = SqlSessionUtil.getSqlSession();
+        StudentMapper studentMapper = sqlSession.getMapper(StudentMapper.class);
+        Searcher searcher = new Searcher();
+        searcher.addCondition("name","二年级", OperatorEnum.EQUALS);
+        searcher.addCondition("student_id","3", OperatorEnum.EQUALS);
+        setMyContextAccessor(sqlSession);
+        List<HumpMap<String,Object>> grades = studentMapper.selectByParamSearch(searcher);
+        System.out.println(grades);
+    }
+
+    /**
+     * 查询带Searcher的多个@Param
+     */
+    @Test
+    public void selectByParamSearch2(){
+        SqlSession sqlSession = SqlSessionUtil.getSqlSession();
+        StudentMapper studentMapper = sqlSession.getMapper(StudentMapper.class);
+        Searcher searcher = new Searcher();
+        searcher.addCondition("student_id","2", OperatorEnum.EQUALS);
+        setMyContextAccessor(sqlSession);
+        List<HumpMap<String,Object>> grades = studentMapper.selectByParamSearch2(searcher,"二年级");
+        System.out.println(grades);
+    }
+
+
+
+
+    public void setMyContextAccessor(SqlSession sqlSession){
+        DynamicContext temp = new DynamicContext(sqlSession.getConfiguration(),null);
+        OgnlRuntime.setPropertyAccessor(temp.getBindings().getClass(), new MyContextAccessor());
+    }
+
 
 }

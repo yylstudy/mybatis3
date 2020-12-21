@@ -1,9 +1,8 @@
 package com.yyl.test;
 
-import com.yyl.page.PageResult;
+import org.apache.ibatis.reflection.MetaObject;
+import org.apache.ibatis.reflection.SystemMetaObject;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 
 /**
  * @Description: TODO
@@ -13,13 +12,14 @@ import java.time.format.DateTimeFormatter;
  */
 public class MyTest3 {
     public static void main(String[] args) throws Exception{
-        String billingCycle = "201908";
-        String createDate = LocalDate.parse(billingCycle + "01", DateTimeFormatter.ofPattern("yyyyMMdd"))
-                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + " 00:00:00";
-        System.out.println(createDate);
+        Animal animal = new Animal();
+        MetaObject obj = SystemMetaObject.forObject(animal);
+        obj.setValue("age",null);
+        System.out.println(animal.age);
     }
-    public static void test1(Class clazz){
-        System.out.println(clazz == PageResult.class);
+
+    static class Animal{
+        private int age;
     }
 
 }

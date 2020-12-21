@@ -1,10 +1,13 @@
 package com.yyl.dao;
 
 import com.yyl.bean.Student;
+import com.yyl.objectWrapperFactory.HumpMap;
 import com.yyl.page.PageInfo;
 import com.yyl.page.PageResult;
+import com.yyl.search.Searcher;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -32,4 +35,12 @@ public interface StudentMapper {
     PageResult<Student> findDynamicPageStudent(PageInfo pageInfo,@Param("ids") List<Integer> ids);
     List<Student> findStudentForGithubPageHelper(@Param("ids") List<Integer> ids);
     int insert(Student student);
+
+    HumpMap<String,Object> selectGradeBuHumpMap(@Param("studentId")Long studentId);
+
+    HumpMap<String,Object> selectByNoParamSearch(Searcher searcher);
+    List<HumpMap<String,Object>> selectByParamSearch(@Param("searcher") Searcher searcher);
+    List<HumpMap<String,Object>> selectByParamSearch2(@Param("searcher2") Searcher searcher,@Param("name")String name);
+    List<HumpMap<String,Object>> comparatorByDate(Date date);
+
 }

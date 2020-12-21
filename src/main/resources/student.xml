@@ -12,14 +12,14 @@
     <sql id="student_sql" databaseId="mysql">
         id,cnname,sex,note
     </sql>
-    <resultMap id="studentInfo" type="com.yyl.bean.Student">
+    <resultMap id="studentInfo"  type="com.yyl.bean.Student">
         <id column="id" property="id"/>
         <result column="cnname" property="cnname"/>
         <result column="sex" property="sex" typeHandler="com.yyl.typeHandler.SexTypeHandler"/>
         <result column="sex" property="sexEnum" />
-        <result column="note" property="note"/>
+        <result column="note" property="note" />
 <!--        一对一查询需要使用到Grade-->
-        <association property="grade" javaType="com.yyl.bean.Grade">
+        <association property="grade"  javaType="com.yyl.bean.Grade">
             <id property="id" column="gradeId"/>
             <result property="name" column="gradeName"/>
         </association>
@@ -66,7 +66,7 @@
         select id,cnname,sex,'6' note from student where id=#{studentId}
     </select>
 
-    <select id="findAllStudentInfo" resultMap="repeatStudentInfo">
+    <select id="findAllStudentInfo" resultMap="repeatStudentInfo" >
         select a.id,a.cnname,a.sex,a.note,b.student_id gradeId,b.name gradeName,
         d.id courseId,d.name courseName from student a
         left join grade b on a.id=b.student_id
@@ -98,7 +98,7 @@
     3.size:代表缓存最多存储的对象
     4：readonly：缓存的数据只能读取不能修改 -->
 <!--    <cache eviction="LRU" flushInterval="100000" readOnly="true" size="1024" />-->
-    <cache type="com.yyl.cache.RedisCache" />
+    <!--<cache type="com.yyl.cache.RedisCache" />-->
 
     <select id="findStudentByDynamicSqlTest" parameterType="com.yyl.bean.Student" resultMap="student">
         select id,cnname,sex,note from student where 1 = 1
@@ -205,6 +205,47 @@
     </select>
 
     <insert id="insert" parameterType="com.yyl.bean.Student">
+
         insert into student(id,cnname,sex,note) values(#{id},#{cnname},#{sex},#{note})
     </insert>
+    
+    <select id="selectGradeBuHumpMap" parameterType="java.lang.Long" resultType="com.yyl.objectWrapperFactory.HumpMap">
+        select * from grade where student_id=#{studentId}
+    </select>
+
+    <select id="selectByNoParamSearch"  resultType="com.yyl.objectWrapperFactory.HumpMap">
+        select * from grade where 1=1
+        <trim prefix="and" prefixOverrides="and |or">
+            <if test="searcher != null and searcher.__condition != null">
+                and ${searcher.__condition}
+            </if>
+        </trim>
+    </select>
+    <select id="selectByParamSearch"  resultType="com.yyl.objectWrapperFactory.HumpMap">
+        select * from grade where 1=1
+        <trim prefix="and" prefixOverrides="and |or">
+            <if test="searcher != null and searcher.__condition != null">
+                and ${searcher.__condition}
+            </if>
+        </trim>
+    </select>
+    <select id="selectByParamSearch2"  resultType="com.yyl.objectWrapperFactory.HumpMap">
+        select * from grade where 1=1 and name=#{name}
+        <trim prefix="and" prefixOverrides="and |or">
+            <if test="searcher2 != null and searcher2.__condition != null">
+                and ${searcher2.__condition}
+            </if>
+        </trim>
+    </select>
+
+    <resultMap id="mma" type="map">
+        <result property="test.name" column="username"/>
+    </resultMap>
+    <select id="comparatorByDate"  resultMap="mma">
+        <![CDATA[
+                select username  from test1 where date1 <=#{date}
+        ]]>
+
+    </select>
+
 </mapper>

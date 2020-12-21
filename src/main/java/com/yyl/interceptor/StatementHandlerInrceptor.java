@@ -36,24 +36,18 @@ public class StatementHandlerInrceptor implements Interceptor {
         Connection connection = (Connection)args[0];
         Method proxyMethod = invocation.getMethod();
         //被代理对象
-        RoutingStatementHandler proxyTarget = (RoutingStatementHandler)invocation.getTarget();
-        MetaObject routingStatementHandlerMetaObject = SystemMetaObject.forObject(proxyTarget);
-        Object preparedStatementHandler = routingStatementHandlerMetaObject.getValue("delegate");
-        MetaObject preparedStatementHandlerMetaObject = SystemMetaObject.forObject(preparedStatementHandler);
-        //获取 参数名和参数值的映射关系，Map<String,Object>，若参数只有一个且没有@Param注解，那么这个parameter就是第一个参数本身
-        Object parameterObject = proxyTarget.getParameterHandler().getParameterObject();
+        MetaObject routingStatementHandlerMetaObject = SystemMetaObject.forObject(invocation.getTarget());
+        String sql = (String)routingStatementHandlerMetaObject.getValue("delegate.boundSql.sql");
+        Object parameterObject = routingStatementHandlerMetaObject.getValue("delegate.boundSql.parameterObject");
         //获取PageInfo对象，这个是否创建代理对象的时候判断过了，所以这里不用判空
         PageInfo pageInfo = getPageInfo(parameterObject);
-        BoundSql boundSql = (BoundSql)preparedStatementHandlerMetaObject.getValue("boundSql");
         //要执行的sql语句
-        String sql = boundSql.getSql();
-        long total = PageHelper.getTotal(connection,sql,proxyTarget);
+        long total = PageHelper.getTotal(connection,sql,(RoutingStatementHandler)invocation.getTarget());
         PageHelper.setPageCount(total);
-        MetaObject boundSqlMetaObject = SystemMetaObject.forObject(boundSql);
         String pageSql = PageHelper.getPageSql(connection,sql,pageInfo);
         //组装分页sql后，再把此sql赋值给BoundSql
-        boundSqlMetaObject.setValue("sql",pageSql);
-        return proxyMethod.invoke(proxyTarget,args);
+        routingStatementHandlerMetaObject.setValue("delegate.boundSql.sql",pageSql);
+        return proxyMethod.invoke(invocation.getTarget(),args);
     }
 
     /**
